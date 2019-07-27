@@ -1,4 +1,5 @@
 const display = document.getElementById('result');
+const history = document.getElementById('history');
 const legalInput = /[0-9-.+*\/]/;
 const number = /[0-9.]/;
 const operatorCheck = /[*\/]/
@@ -11,10 +12,20 @@ let hasOperator = false;
 let hasDot = false;
 display.innerHTML = 0;
 
+const buttons = [].slice.call(document.getElementsByClassName("button"));
+buttons.forEach(button => {
+    button.addEventListener('mousedown', filter);
+});
+
 document.addEventListener('keydown', filter);
 
 function filter(e) {
-    let input = e.key;
+    let input;
+    if (e.key) {
+        input = e.key;
+    }else {
+        input = this.getAttribute("value");
+    }
     if (display.innerHTML == 0 || display.innerHTML === errorMessage) {
         display.innerHTML = '';
     }if(legalInput.test(input)) {
@@ -23,7 +34,18 @@ function filter(e) {
     }else if(input === "Enter" || input==="=") {
         submitted+= "=";
         operate(submitted);
+    }else if(input === "Backspace") {
+        submitted = deleteLastChar(submitted);
+        display.innerHTML = submitted;
+    }else if(input === "c") {
+        submitted = "";
+        display.innerHTML = 0;
     }
+}
+
+function deleteLastChar(a) {
+     a = a.substring(0, a.length-1);
+     return a;
 }
 
 function operate(string) {
@@ -118,6 +140,7 @@ function operate(string) {
       console.table(`input = ${input}, inputSoFar = ${inputSoFar}, operator = ${operator}, num1 = ${num1}, num2=${num2}, hasOperator = ${hasOperator}, lastWasNum = ${lastWasNum}, result = ${result}}`)
     }
     display.innerHTML = result;
+    history.innerHTML = submitted;
     submitted=result;
     hasOperator = false;
   }
@@ -142,3 +165,4 @@ function operateAdditionally(a, b, c) {
             break;
     }
 }
+
