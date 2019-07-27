@@ -1,6 +1,6 @@
 const display = document.getElementById('result');
 const history = document.getElementById('history');
-const legalInput = /[0-9-+*.\/]/;
+const legalInput = /[0-9-+*.\/%]/;
 const number = /[0-9]/;
 const operatorCheck = /[*\/]/
 const plusMinus = /[+-]/;
@@ -27,19 +27,12 @@ function filter(e) {
     } else {
         input = this.getAttribute("value");
     }
-    if (display.innerHTML == 0 || display.innerHTML === errorMessage) {
+    if (display.innerHTML == 0 || display.innerHTML === "NaN") {
         display.innerHTML = '';
-    } if (input === ".") {
-        if (!hasDot) {
-            submitted += input;
-            display.innerHTML += input;
-            hasDot = true;
-        }
-    }
-    if (legalInput.test(input)) {
+    } if (legalInput.test(input)) {
         submitted += input;
         display.innerHTML += input;
-    } else if (input === "Enter" || input === "=") {
+    } else if (input === "Enter") {
         submitted += "=";
         operate(submitted);
     } else if (input === "Backspace") {
@@ -82,6 +75,7 @@ function operate(string) {
             case "8":
             case "9":
             case "0":
+            case ".":
                 if (lastWasNum) {
                     inputSoFar += input;
                 } else if (!lastWasNum) {
@@ -121,7 +115,7 @@ function operate(string) {
                         operator = input;
                     } else if (!hasOperator) {
                         result += Number(inputSoFar);
-                        hasOperator = true;
+                         hasOperator = true;
                     }
                     inputSoFar = "";
                     operator = input;
@@ -149,6 +143,20 @@ function operate(string) {
                     inputSoFar = "";
                 } else if (!lastWasNum) {
                     console.log('Error - must have number before that!')
+                }
+                break;
+
+            case "%":
+                if (lastWasNum) {
+                    if (hasOperator) {
+                        num2 = Number(inputSoFar) / 100;
+                        result += operateAdditionally(num1, operator, num2);
+                    } else if (!hasOperator) {
+                        result += Number(inputSoFar) / 100;
+                    }
+                    inputSoFar = "";
+                } else if (!lastWasNum) {
+                    console.log("error")
                 }
                 break;
 
