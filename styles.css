@@ -73,6 +73,6 @@ body, html {
 }
 
 #advanced {
-    visibility: hidden;
+    /* visibility: hidden; */
     width: 0;
 }

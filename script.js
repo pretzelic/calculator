@@ -1,26 +1,19 @@
 const display = document.getElementById('result');
 const history = document.getElementById('history');
-const legalInput = /[0-9-+*.\/%]/;
+const legalInput = /[0-9-+*.\/%()]/;
 const number = /[0-9]/;
 const operatorCheck = /[*\/]/
 const plusMinus = /[+-]/;
 const errorMessage = "ERROR!!!"
-let nums = [];
-let submitted = ""
-let lastWasNum = false;
-let hasOperator = false;
-let hasDot = false;
-display.innerHTML = 0;
 
 const buttons = [].slice.call(document.getElementsByClassName("button"));
 buttons.forEach(button => {
-    button.addEventListener('mousedown', filter);
+    button.addEventListener('mousedown', btnHandler);
 });
 
-document.addEventListener('keydown', filter);
+document.addEventListener('keydown', btnHandler);
 
-function filter(e) {
-    history.innerHTML = "";
+function btnHandler(e) {
     let input;
     if (e.key) {
         input = e.key;
@@ -29,40 +22,52 @@ function filter(e) {
     }
     if (display.innerHTML == 0 || display.innerHTML === "NaN") {
         display.innerHTML = '';
-    } if (legalInput.test(input)) {
-        submitted += input;
+    }
+    filter(input);
+};
+
+function filter(e) {
+    let input = e;
+    if (input === "ArrowUp") {
+        display.innerHTML = history.innerHTML;
+    }
+    if (legalInput.test(input)) {
         display.innerHTML += input;
-    } else if (input === "Enter") {
-        submitted += "=";
-        operate(submitted);
     } else if (input === "Backspace") {
-        if (submitted[submitted.length - 1] === ".") {
-            hasDot = false;
-        }
-        submitted = deleteLastChar(submitted);
-        display.innerHTML = submitted;
+        display.innerHTML = deleteLastChar(display.innerHTML);
     } else if (input === "c") {
         submitted = "";
         display.innerHTML = 0;
+    } else if (input === "s") {
+        submitted += "√";
+        display.innerHTML += "√"
+    } else if (input === "Enter") {
+        display.innerHTML += "=";
+        history.innerHTML = deleteLastChar(display.innerHTML);
+        display.innerHTML = operate(display.innerHTML);
     }
-}
+};
 
 function deleteLastChar(a) {
     a = a.substring(0, a.length - 1);
     return a;
-}
+};
 
-function operate(string) {
-    display.innerHTML = "";
+function operate(str) {
+    let lastWasNum = false;
+    let hasOperator = false;
+    let hasDot = false;
     let result = 0;
     let num1 = 0;
     let num2 = 0;
     let operator;
     let inputSoFar = "";
-    let equation = string;
+    let equation = str;
+    display.innerHTML = "";
 
     for (let i = 0; i < equation.length; i++) {
         let input = equation[i];
+        console.log(input);
         switch (input) {
 
             case "1":
@@ -77,30 +82,17 @@ function operate(string) {
             case "0":
             case ".":
                 if (lastWasNum) {
-                    inputSoFar += input;
-                } else if (!lastWasNum) {
-                    inputSoFar += input;
-                    lastWasNum = true;
-                }
-                break;
 
-            case "=":
-                if (lastWasNum) {
-                    if (hasOperator) {
-                        num2 = Number(inputSoFar);
-                        result += operateAdditionally(num1, operator, num2);
-                        num1 = 0;
-                        num2 = 0;
-                    } else if (!hasOperator) {
-                        result += Number(inputSoFar);
-                        display.innerHTML = result;
-                        input = result;
-                    }
                 } else if (!lastWasNum) {
-                    console.log("error, need numbers before the =");
-                    hasOperator = false;
-                    lastWasNum = false;
+                    if (hasOperator) {
+
+                    } else if (!hasOperator) {
+
+                    }
                 }
+                inputSoFar += input;
+                lastWasNum = true;
+
                 break;
 
             case "+":
@@ -115,13 +107,14 @@ function operate(string) {
                         operator = input;
                     } else if (!hasOperator) {
                         result += Number(inputSoFar);
-                         hasOperator = true;
+                        hasOperator = true;
                     }
                     inputSoFar = "";
                     operator = input;
                 } else if (!lastWasNum) {
                     inputSoFar += input;
                 }
+                lastWasNum = false;
                 break;
 
             case "*":
@@ -131,6 +124,7 @@ function operate(string) {
                     if (hasOperator) {
                         num2 = Number(inputSoFar);
                         lastWasNum = false;
+                        !operator ? operator = "+" : 1;
                         num1 = operateAdditionally(num1, operator, num2);
                         operator = input;
                         num2 = 0;
@@ -138,12 +132,18 @@ function operate(string) {
                         num1 = Number(inputSoFar);
                         hasOperator = true;
                     }
-                    operator = input;
-                    lastWasNum = false;
-                    inputSoFar = "";
+
                 } else if (!lastWasNum) {
-                    console.log('Error - must have number before that!')
+                    if(hasOperator) {
+
+                    }else if(!hasOperator) {
+                        hasOperator = true;
+                        operator = "*"
+                    }
                 }
+                operator = input;
+                lastWasNum = false;
+                inputSoFar = "";
                 break;
 
             case "%":
@@ -160,13 +160,101 @@ function operate(string) {
                 }
                 break;
 
+            case "(":
+                let brcktEqt = equation.slice(equation.indexOf("(") + 1, equation.lastIndexOf(")"));
+                i += brcktEqt.length;
+                brcktEqt += "=";
+                console.log(brcktEqt);
+                brcktEqt = operate(brcktEqt);
+                console.log(brcktEqt);
+                if (lastWasNum) {
+                    if (hasOperator) {
+                        num2 = Number(inputSoFar) * brcktEqt;
+                        console.log(inputSoFar);
+                        num1 = operateAdditionally(num1, operator, num2);
+                        inputSoFar = "";
+                        num2 = 0;
+                        lastWasNum = false;
+                    } else if (!hasOperator) {
+                        hasOperator = true;
+                        operator = "*"
+                        num1 = brcktEqt;
+                        num2 = Number(inputSoFar);
+                        inputSoFar = "";
+                    }
+                } else if (!lastWasNum) {
+                    if (hasOperator) {
+                        num2 = brcktEqt;
+                        num1 = operateAdditionally(num1, operator, num2);
+                        inputSoFar = "";
+                        num2 = 0;
+                        hasOperator = false;
+                        lastWasNum = false;
+                    } else if (!hasOperator) {
+                        num1 = brcktEqt
+                        hasOperator = true;
+                        operator = "*"
+                    }
+                }
+                break;
+
+                case ")":
+                    if(lastWasNum) {
+
+                    }else if (!lastWasNum){
+                        if(hasOperator) {
+                            operator = "*";
+                        }
+                    }
+                    break;
+
+
+            case "√":
+                if (lastWasNum) {
+                    if (hasOperator) {
+                        num2 = Math.sqrt(Number(inputSoFar));
+                        num1 += operateAdditionally(num1, operator, num2);
+                        operator = input;
+                    } else if (!hasOperator) {
+                        result += Math.sqrt(Number(inputSoFar));
+                    }
+                    inputSoFar = "";
+                } else if (!lastWasNum) {
+                    console.log("error")
+                }
+                break;
+
+            case "=":
+                if (lastWasNum) {
+                    if (hasOperator) {
+                        num2 += Number(inputSoFar);
+                        console.log (num1, operator, num2)
+                        result += operateAdditionally(num1, operator, num2);
+                        num1 = 0;
+                        num2 = 0;
+                    } else if (!hasOperator) {
+                        result += Number(inputSoFar);
+                        console.log(result);
+                    }
+                } else if (!lastWasNum) {
+                    if (hasOperator) {
+                        operator = "+";
+                        result += operateAdditionally(num1, operator, num2);
+                    } else if (!hasOperator) {
+                        result = Number(inputSoFar);
+                    }
+                    console.log("error, need numbers before the =");
+                    hasOperator = false;
+                    lastWasNum = false;
+                }
+                break;
+
         }
-        console.table(`input = ${input}, inputSoFar = ${inputSoFar}, operator = ${operator}, num1 = ${num1}, num2=${num2}, hasOperator = ${hasOperator}, lastWasNum = ${lastWasNum}, result = ${result}}`)
+        console.table(`input = ${input}, inputSoFar = ${inputSoFar}, \n
+         operator = ${operator}, num1 = ${num1}, num2=${num2}, \n
+         lastWasNum = ${lastWasNum}, hasOperator = ${hasOperator}, result = ${result}`)
     }
-    display.innerHTML = result;
-    history.innerHTML = submitted;
-    submitted = result;
-    hasOperator = false;
+    return result;
 }
 
 
@@ -186,6 +274,9 @@ function operateAdditionally(a, b, c) {
             break;
         case "/":
             return num1 / num2;
+            break;
+        case "√":
+            return Math.sqrt(num1);
             break;
     }
 }
