@@ -2,9 +2,10 @@ const display = document.getElementById('result');
 const history = document.getElementById('history');
 const legalInput = /[0-9-+*.\/%()]/;
 const number = /[0-9]/;
-const operatorCheck = /[*\/]/
+const operatorCheck = /[*\/=+-]/
 const plusMinus = /[+-]/;
 const errorMessage = "ERROR!!!"
+let loop = 0;
 
 const buttons = [].slice.call(document.getElementsByClassName("button"));
 buttons.forEach(button => {
@@ -36,15 +37,13 @@ function filter(e) {
     } else if (input === "Backspace") {
         display.innerHTML = deleteLastChar(display.innerHTML);
     } else if (input === "c") {
-        submitted = "";
         display.innerHTML = 0;
     } else if (input === "s") {
-        submitted += "√";
-        display.innerHTML += "√"
+        display.innerHTML += "√("
     } else if (input === "Enter") {
         display.innerHTML += "=";
         history.innerHTML = deleteLastChar(display.innerHTML);
-        display.innerHTML = operate(display.innerHTML);
+        display.innerHTML = operate(display.innerHTML)[0];
     }
 };
 
@@ -52,6 +51,19 @@ function deleteLastChar(a) {
     a = a.substring(0, a.length - 1);
     return a;
 };
+
+function log(input, lastWasNum, hasOperator, inputSoFar, num1, operator, num2, result) {
+    this.input = input;
+    this.lastWasNum = lastWasNum;
+    this.hasOperator = hasOperator;
+    this.inputSoFar = inputSoFar;
+    this.num1 = num1;
+    this.operator = operator;
+    this.num2 = num2;
+    this.result = result;
+}
+
+
 
 function operate(str) {
     let lastWasNum = false;
@@ -63,11 +75,14 @@ function operate(str) {
     let operator;
     let inputSoFar = "";
     let equation = str;
+    let input;
+    let i;
     display.innerHTML = "";
 
-    for (let i = 0; i < equation.length; i++) {
-        let input = equation[i];
-        console.log(input);
+    loop1:
+    for (i = 0; i < equation.length; i++) {
+        input = equation[i];
+        console.log(i, input, lastWasNum, hasOperator)
         switch (input) {
 
             case "1":
@@ -81,40 +96,30 @@ function operate(str) {
             case "9":
             case "0":
             case ".":
-                if (lastWasNum) {
-
-                } else if (!lastWasNum) {
-                    if (hasOperator) {
-
-                    } else if (!hasOperator) {
-
-                    }
-                }
-                inputSoFar += input;
                 lastWasNum = true;
-
+                inputSoFar += input;
                 break;
 
             case "+":
             case "-":
-
+                // +/- are used as seperators of numbers
                 if (lastWasNum) {
                     if (hasOperator) {
-                        num2 = Number(inputSoFar);
+                        inputSoFar === "" ? num2 = 1 : num2 = Number(inputSoFar);
                         result += operateAdditionally(num1, operator, num2);
                         num1 = 0;
                         num2 = 0;
-                        operator = input;
+                        //iSF = input so that the +/- infront of the number is set
+                        inputSoFar = input;
                     } else if (!hasOperator) {
                         result += Number(inputSoFar);
-                        hasOperator = true;
+                        inputSoFar = input;
                     }
-                    inputSoFar = "";
-                    operator = input;
                 } else if (!lastWasNum) {
-                    inputSoFar += input;
+                    inputSoFar = input;
                 }
                 lastWasNum = false;
+                hasOperator = false;
                 break;
 
             case "*":
@@ -122,25 +127,17 @@ function operate(str) {
 
                 if (lastWasNum) {
                     if (hasOperator) {
-                        num2 = Number(inputSoFar);
-                        lastWasNum = false;
-                        !operator ? operator = "+" : 1;
+                        //changed from inputSoFar = 1 to num2 = 1, as iSF wasn't used && to solve (1)*2
+                        inputSoFar === "" ? num2 = 1 : num2 = Number(inputSoFar);
+                        //!operator ? operator = "+" : 1;
                         num1 = operateAdditionally(num1, operator, num2);
                         operator = input;
                         num2 = 0;
                     } else if (!hasOperator) {
                         num1 = Number(inputSoFar);
-                        hasOperator = true;
-                    }
-
-                } else if (!lastWasNum) {
-                    if(hasOperator) {
-
-                    }else if(!hasOperator) {
-                        hasOperator = true;
-                        operator = "*"
                     }
                 }
+                hasOperator = true;
                 operator = input;
                 lastWasNum = false;
                 inputSoFar = "";
@@ -150,110 +147,130 @@ function operate(str) {
                 if (lastWasNum) {
                     if (hasOperator) {
                         num2 = Number(inputSoFar) / 100;
-                        result += operateAdditionally(num1, operator, num2);
+                        num1 = operateAdditionally(num1, operator, num2);
                     } else if (!hasOperator) {
-                        result += Number(inputSoFar) / 100;
+                        num1 = Number(inputSoFar) / 100;
                     }
-                    inputSoFar = "";
-                } else if (!lastWasNum) {
-                    console.log("error")
                 }
+                inputSoFar = "";
+                operatorCheck.test(equation[i + 1]) ? inputSoFar = "1" : "";
+                operator = "*";
+                lastWasNum = true;
+                hasOperator = true;
                 break;
 
             case "(":
-                let brcktEqt = equation.slice(equation.indexOf("(") + 1, equation.lastIndexOf(")"));
-                i += brcktEqt.length;
-                brcktEqt += "=";
-                console.log(brcktEqt);
-                brcktEqt = operate(brcktEqt);
-                console.log(brcktEqt);
+                let bracketEqt = equation.slice(i + 1, equation.length - 1);
+                let bracketResults = operate(bracketEqt);
+                i += bracketResults[1] + 1;
+                //console.log(i, bracketResults, equation.length, bracketEqt);
+                bracketEqt = bracketResults[0];
                 if (lastWasNum) {
                     if (hasOperator) {
-                        num2 = Number(inputSoFar) * brcktEqt;
-                        console.log(inputSoFar);
+                        //Added if below to fix (2)(2)
+                        inputSoFar === "" ? num2 = bracketEqt : num2 = Number(inputSoFar) * bracketEqt;
                         num1 = operateAdditionally(num1, operator, num2);
                         inputSoFar = "";
                         num2 = 0;
                         lastWasNum = false;
                     } else if (!hasOperator) {
-                        hasOperator = true;
-                        operator = "*"
-                        num1 = brcktEqt;
-                        num2 = Number(inputSoFar);
+                        num1 = bracketEqt * Number(inputSoFar);
                         inputSoFar = "";
+                        hasOperator = true;
+                        operator = "*";
                     }
                 } else if (!lastWasNum) {
                     if (hasOperator) {
-                        num2 = brcktEqt;
+                        num2 = bracketEqt;
+                        //num1 = instead of result+=, as this is more logical, and to fix 2*(3)
                         num1 = operateAdditionally(num1, operator, num2);
                         inputSoFar = "";
                         num2 = 0;
-                        hasOperator = false;
-                        lastWasNum = false;
                     } else if (!hasOperator) {
-                        num1 = brcktEqt
+                        //made num1 = bracketEqt + iSF (additionally) so that if +/- from iSF gets assigned. 
+                        //Both are together in case a lone +/- was entered beforethat (2)+(2)
+                        //Also made iSF = "". so that (5)+(4) works. 
+                        num1 = Number(inputSoFar + bracketEqt);
+                        inputSoFar = "";
                         hasOperator = true;
                         operator = "*"
                     }
                 }
+                hasOperator = true;
+                lastWasNum = true;
                 break;
-
-                case ")":
-                    if(lastWasNum) {
-
-                    }else if (!lastWasNum){
-                        if(hasOperator) {
-                            operator = "*";
-                        }
-                    }
-                    break;
-
 
             case "√":
+                let sqrtNum = equation.slice(i + 2, equation.length - 1);
+                console.log(sqrtNum);
+                sqrtNum = operate(sqrtNum);
+                i += sqrtNum[1]+2;
+                sqrtNum = Math.sqrt(sqrtNum[0]);
+                console.log("SQRTNUM " + sqrtNum);
                 if (lastWasNum) {
                     if (hasOperator) {
-                        num2 = Math.sqrt(Number(inputSoFar));
-                        num1 += operateAdditionally(num1, operator, num2);
-                        operator = input;
+                        //Added if below to fix (2)(2)
+                        inputSoFar === "" ? num2 = sqrtNum : num2 = Number(inputSoFar) * sqrtNum;
+                        num1 = operateAdditionally(num1, operator, num2);
+                        inputSoFar = "";
+                        num2 = 0;
+                        lastWasNum = false;
                     } else if (!hasOperator) {
-                        result += Math.sqrt(Number(inputSoFar));
+                        num1 = sqrtNum * Number(inputSoFar);
+                        inputSoFar = "";
+                        hasOperator = true;
+                        operator = "*";
                     }
-                    inputSoFar = "";
                 } else if (!lastWasNum) {
-                    console.log("error")
-                }
-                break;
-
-            case "=":
-                if (lastWasNum) {
                     if (hasOperator) {
-                        num2 += Number(inputSoFar);
-                        console.log (num1, operator, num2)
-                        result += operateAdditionally(num1, operator, num2);
-                        num1 = 0;
+                        num2 = sqrtNum;
+                        //num1 = instead of result+=, as this is more logical, and to fix 2*(3)
+                        num1 = operateAdditionally(num1, operator, num2);
+                        inputSoFar = "";
                         num2 = 0;
                     } else if (!hasOperator) {
-                        result += Number(inputSoFar);
-                        console.log(result);
+                        //made num1 = sqrtNum + iSF (additionally) so that if +/- from iSF gets assigned. 
+                        //Both are together in case a lone +/- was entered beforethat (2)+(2)
+                        //Also made iSF = "". so that (5)+(4) works. 
+                        num1 = Number(inputSoFar + sqrtNum);
+                        inputSoFar = "";
+                        hasOperator = true;
+                        operator = "*"
                     }
-                } else if (!lastWasNum) {
-                    if (hasOperator) {
-                        operator = "+";
-                        result += operateAdditionally(num1, operator, num2);
-                    } else if (!hasOperator) {
-                        result = Number(inputSoFar);
-                    }
-                    console.log("error, need numbers before the =");
-                    hasOperator = false;
-                    lastWasNum = false;
                 }
+                hasOperator = true;
+                lastWasNum = true;
                 break;
 
+            case ")":
+            case "=":
+                break loop1;
+                //using code below to exit loop when no "=" signs. Fixes (2)+2
+                // if (equation.indexOf("=") < 0) {
+                //     break loop1;
+                // }
+                // break;
+
         }
-        console.table(`input = ${input}, inputSoFar = ${inputSoFar}, \n
-         operator = ${operator}, num1 = ${num1}, num2=${num2}, \n
-         lastWasNum = ${lastWasNum}, hasOperator = ${hasOperator}, result = ${result}`)
+        let logs = new log(input, lastWasNum, hasOperator, inputSoFar, num1, operator, num2, result)
+        console.table(logs);
     }
+
+    if (lastWasNum) {
+        if (hasOperator) {
+            inputSoFar === "" ? num2 = 1 : num2 = Number(inputSoFar);
+            result += operateAdditionally(num1, operator, num2);
+            num1 = 0;
+            num2 = 0;
+        } else if (!hasOperator) {
+            result += Number(inputSoFar);
+        }
+    } else if (!lastWasNum) {
+        result += num1;
+    }
+    result = [result, i];
+
+    console.log("RESULT " + result)
     return result;
 }
 
