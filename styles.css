@@ -1,6 +1,9 @@
 body, html {
     height:100%;
     margin: 0;
+    background-image: url("images/numBackgr.jpg");
+    background-repeat: no-repeat;
+    background-size: 100%
 }
 
 .main {
@@ -36,22 +39,16 @@ body, html {
 
 #numpad {
     display: grid;
-    grid-template-columns: repeat(3, 2fr);
+    grid-template-columns: repeat(2, 2fr);
     grid-gap: 5px;
     margin-top: 10px;
     border: 1px solid black;
     padding: 5px;
 }
 
-#advanced, #numbers {
+#operators, #numbers {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    grid-gap: inherit;
-}
-
-#operators {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
     grid-gap: inherit;
 }
 
@@ -73,6 +70,6 @@ body, html {
 }
 
 #advanced {
-    /* visibility: hidden; */
+    visibility: hidden;
     width: 0;
 }
