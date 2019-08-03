@@ -1,49 +1,60 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <link rel="stylesheet" type="text/css" href="styles.css">
-        <link rel="icon" type="image/ico" href="images/calculator.png">
-        <title>Calculator</title>
-        <meta charset="utf-8"/>
-    </head>
-    <body>
-        <div class="main">
-            <div id="display">
-                <div id="history"></div>
-                <div id="result">0</div>
+
+<head>
+    <link rel="stylesheet" type="text/css" href="styles.css">
+    <link rel="icon" type="image/ico" href="images/calculator.png">
+    <title>Calculator</title>
+    <meta charset="utf-8" />
+</head>
+
+<body>
+    <!-- <div class="settings">
+        <div id="settings-btn">settings</div>
+        <div id="settings-expanded">
+            <input type="color">
+        </div>
+    </div> -->
+    <div class="main">
+        <div id="display">
+            <div id="history"></div>
+            <div id="result">0</div>
+        </div>
+        <div id="numpad">
+            <div id="advanced">
+                <div class="button" value="%">%</div>
+                <div class="button" value="("><span>(</span></div>
+                <div class="button" value=")"><span>)</span></div>
+                <div class="button" value="s"><span>√</span></div>
+                <div class="button" value="Backspace"><span>⌫</span></div>
             </div>
-            <div id="numpad">
-                <div id="numbers">
-                    <div class="button" value="9">9</div>
-                    <div class="button" value="8">8</div>
-                    <div class="button" value="7">7</div>
-                    <div class="button" value="6">6</div>
-                    <div class="button" value="5">5</div>
-                    <div class="button" value="4">4</div>
-                    <div class="button" value="3">3</div>
-                    <div class="button" value="2">2</div>
-                    <div class="button" value="1">1</div>
-                    <div class="button" value="0">0</div>
-                    <div class="button" value=".">.</div>
-                    <div class="button" value="c">C</div>
-                </div>
-                <div id="operators">
-                    <div class="button" value="/">/</div>                    
-                    <div class="button" value="*">*</div>
-                    <div class="button" value="Backspace">Del</div>
-                    <div class="button" value="%">%</div>
-                    <div class="button" value="-">-</div>
-                    <div class="button" value="+">+</div>
-                    <div class="button" value="s">√</div>
-                    <div class="button" value="^">aⁿ</div>
-                    <div class="button" value="!">X!</div>
-                    <div class="button" value="(">(</div>
-                    <div class="button" value=")">)</div>
-                    <div class="button" value="Enter">Enter</div>
-                </div>
+            <div id="numbers">
+                <div class="button" value="9"><span>9</span></div>
+                <div class="button" value="8"><span>8</span></div>
+                <div class="button" value="7"><span>7</span></div>
+                <div class="button" value="6"><span>6</span></div>
+                <div class="button" value="5"><span>5</span></div>
+                <div class="button" value="4"><span>4</span></div>
+                <div class="button" value="3"><span>3</span></div>
+                <div class="button" value="2"><span>2</span></div>
+                <div class="button" value="1"><span>1</span></div>
+                <div class="button" value="0"><span>0</span></div>
+                <div class="button" value="."><span>.</span></div>
+                <div class="button" value="c"><span>C</span></div>
+            </div>
+            <div id="operators">
+                <!-- <div class="button" value="^"><span>a²</span></div> -->
+                <div class="button" value="/"><span>/</span></div>
+                <div class="button" value="*"><span>*</span></div>
+                <div class="button" value="-"><span>-</span></div>
+                <div class="button" value="+"><span>+</span></div>
+                <div class="button" value="!"><span>!</span></div>
+                <div class="button" value="Enter"><span>↵</span></div>
             </div>
         </div>
-    </body>
-    <script src="script.js"></script>
-    <script src="tests.js"></script>
+    </div>
+</body>
+<script src="script.js"></script>
+<script src="tests.js"></script>
+
 </html>

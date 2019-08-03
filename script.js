@@ -27,17 +27,14 @@ function btnHandler(e) {
     if (display.innerHTML == 0 || display.innerHTML === "NaN") {
         display.innerHTML = '';
     }
+    console.log(number.test(input));
     filter(input);
 };
 
 function filter(e) {
     let prevChar = input;
     input = e;
-    if (legalInput.test(input)) {
-        display.innerHTML += input;
-        !number.test(input) ? hasDot = false : 1;
-        operatorCheck.test(prevChar) && operatorCheck.test(input) ? display.innerHTML = deleteLastChar(display.innerHTML) : 1;
-    } else if (input === "." && !hasDot) {
+     if (input === "." && !hasDot) {
         console.log(hasDot);
         hasDot = true;
         display.innerHTML += input;
@@ -59,12 +56,15 @@ function filter(e) {
         display.innerHTML += "=";
         history.innerHTML = deleteLastChar(display.innerHTML);
         display.innerHTML = operate(display.innerHTML)[0];
+    } else if (legalInput.test(input) && input[0] !== "F") {
+        display.innerHTML += input;
+        !number.test(input) ? hasDot = false : 1;
+        operatorCheck.test(prevChar) && operatorCheck.test(input) ? display.innerHTML = deleteLastChar(display.innerHTML) : 1;
     }
 };
 
 function deleteLastChar(a) {
-    a = a.substring(0, a.length - 1);
-    return a;
+    return a.substring(0, a.length - 1);
 };
 
 function log(input, lastWasNum, hasOperator, inputSoFar, num1, operator, num2, result) {
@@ -82,7 +82,7 @@ function log(input, lastWasNum, hasOperator, inputSoFar, num1, operator, num2, r
 
 function operate(str) {
     let lastWasNum = false;
-    hasOperator = false;
+    let hasOperator = false;
     let result = 0;
     let num1 = 0;
     let num2 = 0;
@@ -138,7 +138,6 @@ function operate(str) {
 
             case "*":
             case "/":
-            case "^":
 
                 if (lastWasNum) {
                     if (hasOperator) {
@@ -158,6 +157,7 @@ function operate(str) {
                 inputSoFar = "";
                 break;
 
+            case "^":
             case "%":
             case "!":
                 if (lastWasNum) {
@@ -222,10 +222,13 @@ function operate(str) {
 
             case "(":
                 let bracketEqt = equation.slice(i + 1, equation.length - 1);
+                console.log(bracketEqt, "THIIIIIIIS ", lastWasNum, hasOperator);
                 let bracketResults = operate(bracketEqt);
+                console.log(bracketEqt, "THIIIIIIIS ", lastWasNum, hasOperator);
                 i += bracketResults[1] + 1;
                 //console.log(i, bracketResults, equation.length, bracketEqt);
                 bracketEqt = bracketResults[0];
+                console.log("THIIIIIIIS ", lastWasNum, hasOperator)
                 if (lastWasNum) {
                     if (hasOperator) {
                         //Added if below to fix (2)(2)
@@ -288,43 +291,36 @@ function operate(str) {
 }
 
 
-function operateAdditionally(a, b, c) {
-    let num1 = a;
-    let operator = b;
-    let num2 = c;
-    switch (operator) {
+function operateAdditionally(n1, op, n2) {
+    switch (op) {
         case "+":
-            return num1 + num2;
-            break;
+            return n1 + n2;
         case "-":
-            return num1 - num2;
-            break;
+            return n1 - n2;
         case "*":
-            return num1 * num2;
-            break;
+            return n1 * n2;
         case "/":
-            return num1 / num2;
-            break;
+            return n1 / n2;
         case "^":
-            return Math.pow(num1, num2);
+            return Math.pow(n1, n2);
         case "%":
-            return num1 / 100;
-            break;
+            return n1 / 100;
         case "!":
-            return factorial(num1);
-            break;
+            return factorial(n1);
         case "√":
-            return Math.sqrt(num1);
-            break;
+            return Math.sqrt(n1);
+        case "^":
+        n1 = Math.pow(n1, 2);
+        return n1;
     }
 }
 
-function factorial(a) {
-    let result = 1;
-    for (let i = 1; i <= a; i++) {
-        result *= i;
+function factorial(n) {
+    if (n === 0) {
+        return 1;
+    } else {
+        return factorial(n - 1) * n;
     }
-    return result
 }
 
 
